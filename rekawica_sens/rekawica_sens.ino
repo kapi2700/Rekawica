@@ -9,8 +9,12 @@
 #define POLYNOMIAL_8 0x2F // wielomian 8 bitowy (używany w przemyśle motoryzacyjnym)
 const int MPU_ADDR = 0x68; // adres I2C dla MPU-6050
 
+int8_t wejscie[]={5,6,7,8,9}; //numery pinów podpięte do palcow
 
-int msg[2];
+
+//int msg[2];
+int msg[3];     //na trzecim miejscu, jest zapisywane wejscie z palcow
+
 RF24 radio(2,10);
 const uint64_t pipe = 0xE8E8F0F0E1LL;
 
@@ -35,6 +39,17 @@ byte arr[128];
 byte sum_crc;
 long gyro_x_cal, gyro_y_cal, gyro_z_cal;
 
+void czytaj_palce()   //zczytuje i zapisuje wejscie z 5 palcow do msg[2]
+{
+  for(int i=0; i<5; i++)
+  {
+    msg[2]=0;
+    if(digitalRead(wejscie[i]))
+    {
+      msg[2]=(msg[2]|(1<<i));
+    }
+  }
+}
 
 // source: https://www.elektroda.pl/rtvforum/topic1768322.html#8510622
 /*
@@ -104,6 +119,11 @@ void setup() {
  radio.begin();
  radio.openWritingPipe(pipe);
 
+
+ for(int i=0; i<5; i++)
+ {
+  pinMode(wejscie[i],INPUT);
+ }
 }
 
 void loop()
@@ -185,7 +205,8 @@ void loop()
 
 
 
- radio.write(msg, 2);
+ //radio.write(msg, 2);
+ radio.write(msg, 3);
  
 
  
